@@ -1,1 +1,1 @@
-window.PAPYRUS_API_BASE_URL = '';
+window.PAPYRUS_API_BASE_URL = 'https://api-production-2d25cbb2.up.railway.app';
