@@ -1,18 +1,25 @@
 # Papyrus Bilingual High School
 
-Static pages served by a small Node.js/Express web server. The application database and submission service are not integrated yet.
+Papyrus Bilingual High School website with a Node.js/Express admissions API and MySQL storage.
 
 ## Requirements
 
 - Node.js 20 or newer
+- MySQL 8.0.16 or newer
+
 ## Local setup
 
-1. Install dependencies with `npm install`.
-2. Start the website with `npm start`, then open `http://localhost:3000`.
+1. Create a MySQL database and a dedicated database user.
+2. Copy `.env.example` to `.env` and set the MySQL credentials and a random `ADMIN_API_TOKEN` of at least 32 characters.
+3. Install dependencies with `npm install`.
+4. Create the tables with `npm run db:migrate`.
+5. Start the site and API with `npm start`, then open `http://localhost:3000`.
 
-The admissions form is not active yet; submissions are not saved. Connect and test a storage service before collecting personal information.
+For better privilege separation, set `DB_USER`/`DB_PASSWORD` to a runtime account with only `SELECT` and `INSERT` access. Set `DB_MIGRATION_USER`/`DB_MIGRATION_PASSWORD` to a separate account with the required schema privileges (`CREATE`, `ALTER`, `INDEX`, and `REFERENCES`). If the migration credentials are omitted, the migration uses the runtime account.
 
-The server serves the public website files. Use TLS for production traffic and publish an approved privacy notice and retention policy before collecting personal information.
+The form submits one birth certificate, one previous report card and exactly four passport photos. Files must be valid PDF, JPEG or PNG and no larger than 5 MB each. Documents are stored outside the public web root. The application rows and document metadata are inserted together in a MySQL transaction.
+
+For deployment, use persistent private storage for `UPLOAD_DIR`, enable MySQL TLS with `DB_SSL=true`, set `TRUST_PROXY=true` only behind a trusted reverse proxy, and restrict `CORS_ORIGINS` to the website origin. GitHub Pages can host only the static website, not this Node.js API. To keep the current Pages frontend, set `window.PAPYRUS_API_BASE_URL` in `api-config.js` to the deployed API base URL and deploy the API separately. The backend requires a Node.js host and a reachable MySQL 8 database.
 
 School photography is stored locally in `assets/` so it does not depend on third-party image hosts at runtime. The illustrative Pexels photographs show African students and vocational training; they are not official photographs of Papyrus Bilingual High School. The homepage credits Pexels. Photo sources: [classroom](https://www.pexels.com/photo/34526416/), [library](https://www.pexels.com/photo/34748122/), [campus](https://www.pexels.com/photo/35305047/), [lesson](https://www.pexels.com/photo/34211747/), [exams](https://www.pexels.com/photo/37456293/), [sports](https://www.pexels.com/photo/37074242/), [computer class](https://www.pexels.com/photo/30879378/), [science](https://www.pexels.com/photo/8515119/), [graduation](https://www.pexels.com/photo/10604063/), [automotive](https://www.pexels.com/photo/28153670/), [electrical systems](https://www.pexels.com/photo/34526423/), [construction learning](https://www.pexels.com/photo/39909710/), [HVAC](https://www.pexels.com/photo/6471913/), and [sewing](https://www.pexels.com/photo/20853652/). Review each source and its license before public deployment.
 
@@ -20,11 +27,21 @@ All pages include an English/French language toggle and an animation control. Pr
 
 The shared visual system uses the school's navy, institutional blue, red and light-blue palette, with editorial page headers, full-bleed carousel photography, staggered image reveals, and subtle pointer-responsive movement on capable desktop devices. Below-the-fold photographs use native lazy loading; decorative pointer and tilt effects are omitted for reduced-motion and coarse-pointer devices. Supported browsers also receive a restrained cross-page view transition. No WebGL dependency is required.
 
-## Fonctionnalités différées
+## Administrator API
 
-La page `admin.html` est une maquette statique. Aucun dossier n'est enregistré et aucune API d'administration n'est disponible pour le moment.
+- `GET /api/admin/applications` — list the latest 200 applications and document metadata.
+- `GET /api/admin/applications/:applicationId/documents/:documentId` — download one private document.
+- Both endpoints require `Authorization: Bearer <ADMIN_API_TOKEN>`.
+
+The `admin.html` page is a static prototype and does not display private records. Keep the token on the server; do not put it in HTML or browser JavaScript.
 
 ## Configuration
 
 - `PORT` — HTTP port (defaults to 3000).
 - `TRUST_PROXY=true` — set only when the server is behind a trusted reverse proxy.
+- `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` — MySQL connection settings.
+- `DB_SSL=true` — verify TLS for the MySQL connection in production.
+- `ADMIN_API_TOKEN` — private bearer token, at least 32 characters.
+- `UPLOAD_DIR` — private persistent document directory (defaults outside the project root).
+- `CORS_ORIGINS` — comma-separated website origins allowed to call the API.
+- `CORS_ORIGINS` — comma-separated website origins allowed to call the API.

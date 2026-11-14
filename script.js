@@ -485,7 +485,18 @@ document.addEventListener('DOMContentLoaded', () => {
       message.className = 'form-message info';
       message.textContent = translate('Sending your application securely…');
 
-      fetch(form.action, {
+      const apiBaseUrl = window.PAPYRUS_API_BASE_URL?.trim().replace(/\/+$/, '');
+      if (!apiBaseUrl && location.hostname.endsWith('.github.io')) {
+        message.className = 'form-message error';
+        message.textContent = translate('The application service is not connected yet. Please contact the school directly.');
+        if (submitButton) submitButton.disabled = false;
+        return;
+      }
+      const applicationEndpoint = apiBaseUrl
+        ? `${apiBaseUrl}/api/applications`
+        : form.action;
+
+      fetch(applicationEndpoint, {
         method: 'POST',
         body: new FormData(form),
         headers: { Accept: 'application/json' }

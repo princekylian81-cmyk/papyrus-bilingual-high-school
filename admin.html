@@ -72,28 +72,28 @@
         <div class="admin-shell admin-main">
           <div class="section-header" style="margin-bottom: 1.2rem;">
             <span class="eyebrow">Application management</span>
-            <h2>Admissions setup preview</h2>
+            <h2>Admissions management</h2>
           </div>
           <div class="notice-box">
-            <h3>No public dashboard is connected</h3>
-            <p>This static prototype is not connected to an application database. No submissions or documents are stored.</p>
-            <p>Connect and secure a storage service before collecting applications.</p>
+            <h3>Administrator API</h3>
+            <p>This page remains a static prototype. The MySQL-backed application API must be deployed before it can receive submissions.</p>
+            <p>Administrator endpoints require the bearer token configured on the server. Never add that token to this page or browser code.</p>
           </div>
           <div class="card-grid" style="margin-top: 1.5rem;">
             <article class="card">
               <div class="card-icon" data-icon="shield" aria-hidden="true"></div>
               <h3>Private access</h3>
-              <p>Administrator access is not available yet.</p>
+              <p>Protected API access will be available after the backend is deployed.</p>
             </article>
             <article class="card">
               <div class="card-icon" data-icon="list-checks" aria-hidden="true"></div>
               <h3>Applications</h3>
-              <p>Application records are not available because submissions are not being stored.</p>
+              <p>The API is designed to return application details and document metadata.</p>
             </article>
             <article class="card">
               <div class="card-icon" data-icon="folder" aria-hidden="true"></div>
               <h3>Documents</h3>
-              <p>Document storage and downloads are not available yet.</p>
+              <p>Stored documents will only be downloadable through the authenticated API.</p>
             </article>
           </div>
         </div>
