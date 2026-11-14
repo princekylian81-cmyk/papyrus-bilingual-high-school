@@ -1,0 +1,251 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admissions | Papyrus Bilingual High School</title>
+    <meta name="description" content="Admissions information for Papyrus Bilingual High School, including entrance dates, requirements, documentation and registration form." />
+    <link rel="icon" type="image/png" href="papyrus-logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="loader"><div class="loader-inner"><div class="loader-ring"></div><div class="loader-text">Papyrus</div></div></div>
+
+    <header class="site-header">
+      <div class="container navbar">
+        <a href="index.html" class="brand">
+          <img class="brand-logo" src="papyrus-logo.png" alt="" aria-hidden="true" />
+          <span class="brand-copy">
+            <strong>PAPYRUS</strong>
+            <small>Bilingual High School</small>
+          </span>
+        </a>
+
+        <nav aria-label="Main navigation">
+          <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="programs.html">Programs</a></li>
+            <li><a href="specialties.html">Specialties</a></li>
+            <li><a href="admissions.html" class="active">Admissions</a></li>
+            <li><a href="fees.html">Fees</a></li>
+            <li><a href="school-life.html">School Life</a></li>
+            <li><a href="admin.html">Admin</a></li>
+            <li><a href="index.html#contact">Contact</a></li>
+          </ul>
+        </nav>
+
+        <div class="nav-actions">
+          <a class="btn secondary" href="admissions.html">Apply Now</a>
+          <button class="language-toggle" type="button" data-language-toggle aria-label="Switch language">FR</button>
+          <button class="motion-toggle" type="button" data-motion-toggle aria-label="Enable animations" title="Enable animations" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="M19 14v4m-2-2h4"/></svg></button>
+          <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-hero">
+        <div class="container">
+          <div>
+            <div class="breadcrumb">Home / Admissions</div>
+            <h1>Admissions</h1>
+          </div>
+          <div class="tag">Apply for the 2026-2027 session</div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container two-col">
+          <div class="reveal">
+            <span class="eyebrow">Entrance dates</span>
+            <h2>Begin your application journey with confidence.</h2>
+            <ul class="deadline-list">
+              <li><strong>Entrance Dates</strong><span>16 May 2026</span></li>
+              <li><strong>Entrance Dates</strong><span>23 May 2026</span></li>
+            </ul>
+
+            <div class="notice-box" style="margin-top: 1.8rem;">
+              <h3>Admission requirements</h3>
+              <p>By entrance examination for 6e and Form I classes.</p>
+              <p>By file study as from 5e and Form II classes.</p>
+            </div>
+
+            <div class="notice-box">
+              <h3>File composition</h3>
+              <ul class="feature-list" style="margin-top: 0.5rem;">
+                <li class="feature-item"><span class="dot"></span><div>A copy of Birth Certificate.</div></li>
+                <li class="feature-item"><span class="dot"></span><div>Report card of previous school year.</div></li>
+                <li class="feature-item"><span class="dot"></span><div>04 Passport Size Photos 4x4 in colour.</div></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="reveal form-wrap">
+            <h3 style="margin-bottom: 1rem;">Pre-enrolment form</h3>
+            <form id="application-form" action="/api/applications" method="post" enctype="multipart/form-data" data-validate data-application>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="fullname">Student's Full Name</label>
+                  <input id="fullname" name="studentName" type="text" maxlength="120" autocomplete="name" required />
+                </div>
+                <div class="form-group">
+                  <label for="dob">Date of Birth</label>
+                  <input id="dob" name="dateOfBirth" type="date" required />
+                </div>
+                <div class="form-group">
+                  <label for="gender">Gender</label>
+                  <select id="gender" name="gender" required>
+                    <option value="">Select</option>
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="parent">Parent/Guardian Name</label>
+                  <input id="parent" name="guardianName" type="text" maxlength="120" autocomplete="name" required />
+                </div>
+                <div class="form-group">
+                  <label for="father-phone">Father's Phone Number</label>
+                  <input id="father-phone" name="fatherPhone" type="tel" maxlength="24" autocomplete="tel" required />
+                </div>
+                <div class="form-group">
+                  <label for="mother-phone">Mother's Phone Number</label>
+                  <input id="mother-phone" name="motherPhone" type="tel" maxlength="24" autocomplete="tel" required />
+                </div>
+                <div class="form-group">
+                  <label for="email">Email Address</label>
+                  <input id="email" name="email" type="email" maxlength="254" autocomplete="email" required />
+                </div>
+                <div class="form-group">
+                  <label for="class">Desired Class</label>
+                  <select id="class" name="desiredClass" required>
+                    <option value="">Select</option>
+                    <option>6e</option>
+                    <option value="Form I">Form I</option>
+                    <option value="Form II">Form II</option>
+                    <option value="Form III">Form III</option>
+                    <option value="Form IV">Form IV</option>
+                    <option value="Form V">Form V</option>
+                    <option value="Lower Sixth">Lower Sixth</option>
+                    <option value="Upper Sixth">Upper Sixth</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="type">Desired Education Type</label>
+                  <select id="type" name="educationType" required>
+                    <option value="">Select</option>
+                    <option value="General Education">General Education</option>
+                    <option value="Technical Commercial">Technical Commercial</option>
+                    <option value="Technical Industrial">Technical Industrial</option>
+                  </select>
+                </div>
+                <div class="form-group full">
+                  <label for="specialty">Desired Specialty (technical programs)</label>
+                  <input id="specialty" name="specialty" type="text" maxlength="120" placeholder="e.g. Accounting, Electrical Power System" />
+                </div>
+                <div class="form-group full">
+                  <label for="birth-cert">Upload Birth Certificate (PDF, JPG or PNG; max 5 MB)</label>
+                  <input id="birth-cert" name="birthCertificate" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required />
+                </div>
+                <div class="form-group full">
+                  <label for="report-card">Upload Previous Report Card (PDF, JPG or PNG; max 5 MB)</label>
+                  <input id="report-card" name="previousReportCard" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required />
+                </div>
+                <div class="form-group full">
+                  <label for="photos">Upload 4 Passport Photos (PDF, JPG or PNG; max 5 MB each)</label>
+                  <input id="photos" name="passportPhotos" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" multiple required />
+                </div>
+                <div class="form-group full">
+                  <label class="consent-label">
+                    <input name="consent" type="checkbox" value="yes" required />
+                    I am the parent/guardian or authorized to submit this information, and I consent to its use for this admission application.
+                  </label>
+                </div>
+              </div>
+              <div class="hero-actions" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn primary">Submit Application</button>
+              </div>
+              <div class="form-message" role="status" aria-live="polite"></div>
+              <p class="form-help">Your application and documents are sent securely to the school. Do not submit until the school’s secure application service is available.</p>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-small" style="background: rgba(22,70,160,0.03);">
+        <div class="container reveal">
+          <div class="section-header">
+            <span class="eyebrow">School materials</span>
+            <h2>Required materials for the new academic year.</h2>
+          </div>
+          <div class="card-grid">
+            <article class="card">
+              <div class="card-icon" data-icon="file-text" aria-hidden="true"></div>
+              <h3>Paper</h3>
+              <p>01 realm of A4 papers (Double A 80g).</p>
+            </article>
+            <article class="card">
+              <div class="card-icon" data-icon="scroll" aria-hidden="true"></div>
+              <h3>Toilet tissue</h3>
+              <p>06 rolls of toilet tissue.</p>
+            </article>
+            <article class="card">
+              <div class="card-icon" data-icon="circle-check" aria-hidden="true"></div>
+              <h3>Checklist</h3>
+              <p>Applicants should ensure all required documents are complete before submission.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col">
+            <div class="brand" style="margin-bottom: 1rem;">
+              <img class="brand-logo" src="papyrus-logo.png" alt="" aria-hidden="true" />
+              <span class="brand-copy"><strong>PAPYRUS</strong><small>Bilingual High School</small></span>
+            </div>
+            <p>Excellence in General, Technical and Vocational Education.</p>
+          </div>
+          <div class="footer-col">
+            <h3>Quick links</h3>
+            <div class="footer-links">
+              <a href="programs.html">Programs</a>
+              <a href="specialties.html">Specialties</a>
+              <a href="fees.html">Fees</a>
+              <a href="school-life.html">School Life</a>
+            </div>
+          </div>
+          <div class="footer-col">
+            <h3>Contact</h3>
+            <ul class="footer-meta">
+              <li>Douala – Cameroon</li>
+              <li><a href="tel:+237695878931">+237 695 878 931</a></li>
+              <li><a href="tel:+237683180095">+237 683 180 095</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h3>Legal</h3>
+            <div class="footer-links">
+              <a href="#">Privacy Policy</a>
+              <a href="#">Terms & Conditions</a>
+            </div>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>© 2026 Papyrus Bilingual High School</span>
+          <span>All Rights Reserved</span>
+        </div>
+      </div>
+    </footer>
+
+    <script src="language.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

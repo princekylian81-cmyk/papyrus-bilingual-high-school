@@ -1,0 +1,27 @@
+{
+  "name": "papyrus-bilingual-high-school",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "check": "node --check server.js && node --check script.js && node --check language.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "gsap": "^3.12.5",
+    "scrolltrigger": "^3.12.0",
+    "framer-motion": "^11.0.0",
+    "three": "^0.160.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "@react-three/fiber": "^8.15.0",
+    "@react-three/drei": "^9.101.0",
+    "lenis": "^1.0.30"
+  }
+}

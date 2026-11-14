@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://princekylian81-cmyk.github.io/papyrus-bilingual-high-school/sitemap.xml
