@@ -63,6 +63,20 @@ function formatDate(value) {
   }).format(date);
 }
 
+function formatFee(amount) {
+  const value = Number(amount);
+  if (!Number.isFinite(value) || value <= 0) return '—';
+  return `${new Intl.NumberFormat('fr-FR').format(value)} FCFA`;
+}
+
+function methodLabel(method) {
+  return {
+    'orange-money': 'Orange Money',
+    'mtn-momo': 'MTN Mobile Money',
+    'bank-transfer': 'Virement bancaire'
+  }[method] || 'Paiement déclaré';
+}
+
 function formatDateOnly(value) {
   if (!value) return '—';
   const date = new Date(`${value}T00:00:00`);
@@ -154,7 +168,10 @@ function renderApplications() {
     const badge = fragment.querySelector('.status-badge');
     const status = statusLabel[application.status] ? application.status : 'pending';
     const documentList = fragment.querySelector('.document-list');
+    const requirementList = fragment.querySelector('.requirement-list');
     const actions = fragment.querySelector('.card-actions');
+    const decisionField = fragment.querySelector('[data-decision-note]');
+    const paymentState = fragment.querySelector('.payment-state');
 
     card.dataset.id = application.id;
     fragment.querySelector('.student-name').textContent = application.studentName || 'Élève sans nom';
@@ -173,6 +190,29 @@ function renderApplications() {
     appendDetail(details, 'Téléphone du père', application.fatherPhone);
     appendDetail(details, 'Téléphone de la mère', application.motherPhone);
     appendDetail(details, 'Adresse e-mail', application.email);
+    appendDetail(details, 'Frais d’inscription', formatFee(application.registrationFee));
+    if (status === 'rejected' && application.decisionNote) {
+      appendDetail(details, 'Motif du refus', application.decisionNote);
+    }
+
+    const requirements = application.requirements?.items || [];
+    if (requirements.length === 0) {
+      const emptyRequirement = document.createElement('p');
+      emptyRequirement.className = 'no-documents';
+      emptyRequirement.textContent = 'Exigences indisponibles pour ce dossier.';
+      requirementList.append(emptyRequirement);
+    } else {
+      for (const item of requirements) {
+        const row = document.createElement('div');
+        row.className = `requirement-item ${item.met ? 'met' : 'missed'}`;
+        const label = document.createElement('span');
+        label.textContent = item.blocking ? item.label : `${item.label} (information)`;
+        const mark = document.createElement('strong');
+        mark.textContent = item.met ? 'Conforme' : 'Manquant';
+        row.append(label, mark);
+        requirementList.append(row);
+      }
+    }
 
     const documents = Array.isArray(application.documents) ? application.documents : [];
     if (!documents.length) {
@@ -200,23 +240,37 @@ function renderApplications() {
     const reviewButton = fragment.querySelector('[data-action="review"]');
     const acceptButton = fragment.querySelector('[data-action="accept"]');
     const rejectButton = fragment.querySelector('[data-action="reject"]');
-    const paymentLink = fragment.querySelector('[data-action="payment"]');
     reviewButton.addEventListener('click', () => updateApplicationStatus(application.id, 'under_review', reviewButton));
     acceptButton.addEventListener('click', () => updateApplicationStatus(application.id, 'accepted', acceptButton));
-    rejectButton.addEventListener('click', () => updateApplicationStatus(application.id, 'rejected', rejectButton));
+    rejectButton.addEventListener('click', () => {
+      const note = decisionField.value.trim();
+      if (note.length < 8) {
+        setBanner('Indiquez un motif de refus d’au moins 8 caractères. Le parent le verra sur son suivi.', 'error');
+        decisionField.focus();
+        return;
+      }
+      updateApplicationStatus(application.id, 'rejected', rejectButton, note);
+    });
 
-    if (status === 'accepted') {
-      paymentLink.href = `/app/payment.html?applicationId=${encodeURIComponent(application.id)}`;
-      paymentLink.classList.remove('hidden');
-      actions.classList.add('accepted-actions');
-      reviewButton.classList.add('hidden');
-      acceptButton.classList.add('hidden');
-      rejectButton.classList.add('hidden');
+    if (application.requirements && application.requirements.eligible === false) {
+      acceptButton.disabled = true;
+      acceptButton.title = 'Les pièces exigées ne sont pas complètes.';
     }
-    if (status === 'rejected') {
+
+    if (application.paymentStatus === 'declared') {
+      paymentState.textContent = `Paiement déclaré par le parent : ${methodLabel(application.paymentMethod)} · ${application.paymentReference || 'référence reçue'}.`;
+    } else if (status === 'accepted') {
+      paymentState.textContent = `Dossier validé. Le parent peut payer ${formatFee(application.registrationFee)} depuis la page de suivi.`;
+    } else {
+      paymentState.textContent = 'Le paiement du parent s’ouvrira seulement après validation.';
+    }
+
+    if (status === 'accepted' || status === 'rejected') {
+      decisionField.closest('.decision-note').classList.add('hidden');
       reviewButton.classList.add('hidden');
       acceptButton.classList.add('hidden');
       rejectButton.classList.add('hidden');
+      actions.classList.add('accepted-actions');
     }
 
     listElement.append(fragment);
@@ -251,8 +305,12 @@ async function fetchApplications({ quiet = false } = {}) {
     const payload = await response.json();
     const nextApplications = Array.isArray(payload.applications) ? payload.applications : [];
     const previousIds = new Set(applicationsCache.map((application) => application.id));
+    const previousPayments = new Map(applicationsCache.map((application) => [application.id, application.paymentStatus]));
     const newCount = hasLoaded
       ? nextApplications.filter((application) => !previousIds.has(application.id)).length
+      : 0;
+    const paidCount = hasLoaded
+      ? nextApplications.filter((application) => application.paymentStatus === 'declared' && previousPayments.get(application.id) !== 'declared').length
       : 0;
     applicationsCache = nextApplications;
     hasLoaded = true;
@@ -266,6 +324,8 @@ async function fetchApplications({ quiet = false } = {}) {
     }).format(new Date())}`;
     if (newCount > 0) {
       setBanner(`${newCount} nouvelle${newCount > 1 ? 's' : ''} candidature${newCount > 1 ? 's' : ''} reçue${newCount > 1 ? 's' : ''}.`, 'success');
+    } else if (paidCount > 0) {
+      setBanner(`${paidCount} paiement${paidCount > 1 ? 's' : ''} déclaré${paidCount > 1 ? 's' : ''} par ${paidCount > 1 ? 'des parents' : 'un parent'}.`, 'success');
     } else if (!quiet) {
       setBanner(`${applicationsCache.length} dossier${applicationsCache.length > 1 ? 's' : ''} synchronisé${applicationsCache.length > 1 ? 's' : ''}. Actualisation automatique toutes les 5 secondes.`, 'success');
     }
@@ -280,7 +340,7 @@ async function fetchApplications({ quiet = false } = {}) {
   }
 }
 
-async function updateApplicationStatus(applicationId, nextStatus, button) {
+async function updateApplicationStatus(applicationId, nextStatus, button, decisionNote) {
   button.disabled = true;
   try {
     const response = await fetch(`${applicationEndpoint}/${encodeURIComponent(applicationId)}/status`, {
@@ -289,7 +349,7 @@ async function updateApplicationStatus(applicationId, nextStatus, button) {
         ...buildHeaders(),
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ status: nextStatus })
+      body: JSON.stringify({ status: nextStatus, decisionNote })
     });
     if (!response.ok) throw new Error(await readError(response));
     setBanner(`Le dossier a été marqué « ${statusLabel[nextStatus].toLowerCase()} ».`, 'success');

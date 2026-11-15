@@ -840,6 +840,32 @@ input.invalid, select.invalid, textarea.invalid {
   color: var(--red);
 }
 
+.form-message a,
+.follow-panel a {
+  color: inherit;
+}
+
+.follow-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.follow-options {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.follow-options label,
+.payment-choice {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(22, 70, 160, 0.16);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
 .contact-list {
   list-style: none;
   padding: 0;

@@ -509,8 +509,21 @@ document.addEventListener('DOMContentLoaded', () => {
           return result;
         })
         .then((result) => {
+          const reference = String(result.reference || '');
+          try {
+            sessionStorage.setItem('papyrus-parent-follow', JSON.stringify({
+              reference,
+              email: String(form.elements.email?.value || '').trim()
+            }));
+          } catch (error) {
+            console.warn('Could not save the parent follow-up session.', error);
+          }
           message.className = 'form-message success';
-          message.textContent = `${translate('Application received securely. Your reference is')} ${result.reference}.`;
+          message.replaceChildren(document.createTextNode(`${translate('Application received securely. Your reference is')} ${reference}. `));
+          const followLink = document.createElement('a');
+          followLink.href = `suivi.html?reference=${encodeURIComponent(reference)}`;
+          followLink.textContent = translate('Follow this application');
+          message.append(followLink);
           form.reset();
         })
         .catch((error) => {

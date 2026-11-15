@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Secrétariat Papyrus | Admissions</title>
     <meta name="description" content="Espace sécurisé du secrétariat Papyrus pour le suivi des candidatures." />
-    <link rel="icon" type="image/png" href="/papyrus-logo.png" />
+    <link rel="icon" type="image/png" href="/app/papyrus-logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/app/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body class="secretary-body">
     <header class="secretary-header">
       <a class="header-brand" href="/" aria-label="Retour au site Papyrus">
-        <img class="brand-logo" src="/papyrus-logo.png" alt="Logo Papyrus" />
+        <span class="brand-mark"><img class="brand-logo" src="papyrus-logo.png" alt="Logo Papyrus" /></span>
         <span class="brand-copy">
           <small>Bilingual High School</small>
           <strong>PAPYRUS</strong>
@@ -120,17 +120,31 @@
 
         <div class="document-section">
           <div class="documents-heading">
+            <span class="documents-label">Exigences de l’école</span>
+            <span class="documents-note">À comparer avec le dossier</span>
+          </div>
+          <div class="requirement-list"></div>
+        </div>
+
+        <div class="document-section">
+          <div class="documents-heading">
             <span class="documents-label">Pièces jointes</span>
             <span class="documents-note">Documents transmis par la famille</span>
           </div>
           <div class="document-list"></div>
         </div>
 
+        <p class="payment-state"></p>
+
+        <label class="decision-note">
+          <span>Motif si le dossier ne correspond pas</span>
+          <textarea data-decision-note maxlength="500" rows="2" placeholder="Exemple : le bulletin ne correspond pas à la classe demandée"></textarea>
+        </label>
+
         <div class="card-actions">
           <button class="btn review-button" type="button" data-action="review">Mettre en examen</button>
           <button class="btn accept-button" type="button" data-action="accept">Valider le dossier</button>
           <button class="btn reject-button" type="button" data-action="reject">Refuser</button>
-          <a class="btn payment-link hidden" data-action="payment" href="/app/payment.html">Continuer vers le paiement <span aria-hidden="true">↗</span></a>
         </div>
       </article>
     </template>

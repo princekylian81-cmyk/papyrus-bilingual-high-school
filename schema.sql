@@ -12,6 +12,12 @@ CREATE TABLE IF NOT EXISTS applications (
   specialty VARCHAR(120) NULL,
   consent_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   status ENUM('pending', 'under_review', 'accepted', 'rejected') NOT NULL DEFAULT 'pending',
+  decision_note VARCHAR(500) NULL,
+  reviewed_at DATETIME NULL,
+  payment_status ENUM('unpaid', 'declared') NOT NULL DEFAULT 'unpaid',
+  payment_method ENUM('orange-money', 'mtn-momo', 'bank-transfer') NULL,
+  payment_reference VARCHAR(80) NULL,
+  payment_declared_at DATETIME NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX applications_created_at_idx (created_at DESC),
   INDEX applications_status_created_at_idx (status, created_at DESC)

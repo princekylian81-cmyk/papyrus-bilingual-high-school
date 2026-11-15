@@ -19,6 +19,7 @@ const allowedPages = new Set([
   'about.html',
   'admin.html',
   'admissions.html',
+  'suivi.html',
   'api-config.js',
   'fees.html',
   'index.html',
@@ -30,6 +31,7 @@ const allowedPages = new Set([
   'specialties.html',
   'styles.css',
   'script.js',
+  'suivi.js',
   'robots.txt',
   'sitemap.xml'
 ]);
@@ -57,6 +59,28 @@ const documentFields = [
   { name: 'previousReportCard', maxCount: 1 },
   { name: 'passportPhotos', maxCount: 4 }
 ];
+const applicationColumns = `
+  id,
+  student_name AS studentName,
+  date_of_birth AS dateOfBirth,
+  gender,
+  guardian_name AS guardianName,
+  father_phone AS fatherPhone,
+  mother_phone AS motherPhone,
+  email,
+  desired_class AS desiredClass,
+  education_type AS educationType,
+  specialty,
+  consent_at AS consentAt,
+  status,
+  decision_note AS decisionNote,
+  reviewed_at AS reviewedAt,
+  payment_status AS paymentStatus,
+  payment_method AS paymentMethod,
+  payment_reference AS paymentReference,
+  payment_declared_at AS paymentDeclaredAt,
+  created_at AS createdAt
+`;
 const applicationSchema = z.object({
   studentName: z.string().trim().min(2).max(120),
   dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -119,6 +143,14 @@ const applicationLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'Too many applications from this connection. Please try again later.' }
 });
+const followLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 60,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { error: 'Too many status checks from this connection. Please try again later.' }
+});
+app.use(express.json({ limit: '16kb' }));
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
@@ -154,21 +186,7 @@ app.post('/api/applications', applicationLimiter, requireApplicationOrigin, (req
 app.get('/api/admin/applications', requireAdmin, async (req, res, next) => {
   try {
     const [applications] = await pool.execute(`
-      SELECT
-        id,
-        student_name AS studentName,
-        date_of_birth AS dateOfBirth,
-        gender,
-        guardian_name AS guardianName,
-        father_phone AS fatherPhone,
-        mother_phone AS motherPhone,
-        email,
-        desired_class AS desiredClass,
-        education_type AS educationType,
-        specialty,
-        consent_at AS consentAt,
-        status,
-        created_at AS createdAt
+      SELECT ${applicationColumns}
       FROM applications
       ORDER BY created_at DESC
       LIMIT 200
@@ -189,25 +207,10 @@ app.get('/api/admin/applications/:applicationId', requireAdmin, async (req, res,
       return;
     }
 
-    const [applications] = await pool.execute(`
-      SELECT
-        id,
-        student_name AS studentName,
-        date_of_birth AS dateOfBirth,
-        gender,
-        guardian_name AS guardianName,
-        father_phone AS fatherPhone,
-        mother_phone AS motherPhone,
-        email,
-        desired_class AS desiredClass,
-        education_type AS educationType,
-        specialty,
-        consent_at AS consentAt,
-        status,
-        created_at AS createdAt
-      FROM applications
-      WHERE id = ?
-    `, [parsed.data.applicationId]);
+    const [applications] = await pool.execute(
+      `SELECT ${applicationColumns} FROM applications WHERE id = ?`,
+      [parsed.data.applicationId]
+    );
 
     if (applications.length === 0) {
       res.status(404).json({ error: 'Application not found.' });
@@ -225,7 +228,8 @@ app.patch('/api/admin/applications/:applicationId/status', requireAdmin, async (
   try {
     const parsedParams = z.object({ applicationId: z.string().uuid() }).safeParse(req.params);
     const parsedBody = z.object({
-      status: z.enum(['pending', 'under_review', 'accepted', 'rejected'])
+      status: z.enum(['pending', 'under_review', 'accepted', 'rejected']),
+      decisionNote: z.string().trim().max(500).optional()
     }).safeParse(req.body);
 
     if (!parsedParams.success || !parsedBody.success) {
@@ -235,10 +239,39 @@ app.patch('/api/admin/applications/:applicationId/status', requireAdmin, async (
 
     const { applicationId } = parsedParams.data;
     const { status } = parsedBody.data;
+    const decisionNote = status === 'rejected' ? (parsedBody.data.decisionNote || '') : null;
+    if (status === 'rejected' && decisionNote.length < 8) {
+      res.status(400).json({ error: 'Indiquez un motif de refus d’au moins 8 caractères. Le parent le verra sur son suivi.' });
+      return;
+    }
+
+    if (status === 'accepted') {
+      const [existing] = await pool.execute(
+        `SELECT ${applicationColumns} FROM applications WHERE id = ?`,
+        [applicationId]
+      );
+      if (existing.length === 0) {
+        res.status(404).json({ error: 'Application not found.' });
+        return;
+      }
+      const [documents] = await pool.execute(
+        `SELECT document_type AS type
+         FROM application_documents
+         WHERE application_id = ?`,
+        [applicationId]
+      );
+      const requirements = buildRequirements(existing[0], documents);
+      if (!requirements.eligible) {
+        res.status(409).json({ error: 'Le dossier ne respecte pas les pièces exigées par l’école. Refusez-le ou demandez un dossier complet.' });
+        return;
+      }
+    }
 
     const [result] = await pool.execute(
-      'UPDATE applications SET status = ? WHERE id = ?',
-      [status, applicationId]
+      `UPDATE applications
+       SET status = ?, decision_note = ?, reviewed_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [status, decisionNote, applicationId]
     );
 
     if (result.affectedRows === 0) {
@@ -251,6 +284,75 @@ app.patch('/api/admin/applications/:applicationId/status', requireAdmin, async (
       status,
       message: 'Application status updated successfully.'
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/applications/:applicationId/status', followLimiter, async (req, res, next) => {
+  try {
+    const parsed = z.object({
+      applicationId: z.string().uuid(),
+      email: z.string().trim().email().max(254)
+    }).safeParse({
+      applicationId: req.params.applicationId,
+      email: req.query.email
+    });
+    if (!parsed.success) {
+      res.status(400).json({ error: 'Enter the application reference and the parent email used on the form.' });
+      return;
+    }
+
+    const application = await findApplicationForParent(parsed.data.applicationId, parsed.data.email);
+    if (!application) {
+      res.status(404).json({ error: 'No application matches this reference and email address.' });
+      return;
+    }
+
+    res.set('Cache-Control', 'no-store').json({ application: parentView(application) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post('/api/applications/:applicationId/payment', followLimiter, async (req, res, next) => {
+  try {
+    const parsed = z.object({
+      applicationId: z.string().uuid(),
+      email: z.string().trim().email().max(254),
+      method: z.enum(['orange-money', 'mtn-momo', 'bank-transfer']),
+      reference: z.string().trim().min(4).max(80)
+    }).safeParse({
+      applicationId: req.params.applicationId,
+      email: req.body?.email,
+      method: req.body?.method,
+      reference: req.body?.reference
+    });
+    if (!parsed.success) {
+      res.status(400).json({ error: 'Choose a payment method and enter the payment reference.' });
+      return;
+    }
+
+    const application = await findApplicationForParent(parsed.data.applicationId, parsed.data.email);
+    if (!application) {
+      res.status(404).json({ error: 'No application matches this reference and email address.' });
+      return;
+    }
+    if (application.status !== 'accepted') {
+      res.status(409).json({ error: 'Payment opens only after the secretary accepts the application.' });
+      return;
+    }
+    if (application.paymentStatus !== 'declared') {
+      await pool.execute(
+        `UPDATE applications
+         SET payment_status = 'declared', payment_method = ?, payment_reference = ?, payment_declared_at = CURRENT_TIMESTAMP
+         WHERE id = ? AND status = 'accepted'`,
+        [parsed.data.method, parsed.data.reference, parsed.data.applicationId]
+      );
+    }
+
+    const updated = await findApplicationForParent(parsed.data.applicationId, parsed.data.email);
+    res.set('Cache-Control', 'no-store').json({ application: parentView(updated) });
   } catch (error) {
     next(error);
   }
@@ -309,7 +411,7 @@ app.get('/app', (req, res) => {
   res.sendFile(path.join(root, 'app', 'index.html'));
 });
 app.get('/app/:file', (req, res, next) => {
-  const allowedAppFiles = new Set(['index.html', 'styles.css', 'app.js', 'payment.html', 'payment.js']);
+  const allowedAppFiles = new Set(['index.html', 'styles.css', 'app.js', 'payment.html', 'payment.js', 'papyrus-logo.png']);
   if (!allowedAppFiles.has(req.params.file)) {
     next();
     return;
@@ -498,10 +600,77 @@ async function hydrateApplicationsWithDocuments(applications) {
     documentsByApplication.set(document.applicationId, current);
   }
 
-  return applications.map((application) => ({
-    ...application,
-    documents: documentsByApplication.get(application.id) || []
-  }));
+  return applications.map((application) => {
+    const documents = documentsByApplication.get(application.id) || [];
+    const fee = registrationFeeFor(application.educationType);
+    return {
+      ...application,
+      documents,
+      registrationFee: fee.amount,
+      registrationLabel: fee.label,
+      requirements: buildRequirements(application, documents)
+    };
+  });
+}
+
+function registrationFeeFor(educationType) {
+  if (educationType === 'Technical Industrial') {
+    return { amount: 80000, label: 'Registration and workshop fees' };
+  }
+  return { amount: 40000, label: 'Registration' };
+}
+
+function buildRequirements(application, documents) {
+  const photos = documents.filter((document) => document.type === 'passport_photo').length;
+  const examClass = application.desiredClass === '6e' || application.desiredClass === 'Form I';
+  const specialtyMet = application.educationType === 'General Education'
+    ? !application.specialty
+    : Boolean(application.specialty && String(application.specialty).trim());
+  const items = [
+    { id: 'birth_certificate', label: 'Acte de naissance', met: documents.some((document) => document.type === 'birth_certificate'), blocking: true },
+    { id: 'report_card', label: 'Bulletin de l’année précédente', met: documents.some((document) => document.type === 'previous_report_card'), blocking: true },
+    { id: 'photos', label: 'Quatre photos d’identité', met: photos === 4, blocking: true },
+    { id: 'specialty', label: 'Spécialité conforme à la filière', met: specialtyMet, blocking: true },
+    {
+      id: 'pathway',
+      label: examClass ? 'Admission sur concours (6e et Form I)' : 'Étude de dossier à partir de Form II',
+      met: true,
+      blocking: false
+    }
+  ];
+  return {
+    items,
+    eligible: items.filter((item) => item.blocking).every((item) => item.met)
+  };
+}
+
+function parentView(application) {
+  const fee = registrationFeeFor(application.educationType);
+  const declared = application.paymentStatus === 'declared';
+  return {
+    reference: application.id,
+    studentName: application.studentName,
+    desiredClass: application.desiredClass,
+    educationType: application.educationType,
+    specialty: application.specialty || '',
+    status: application.status,
+    decisionNote: application.status === 'rejected' ? application.decisionNote : null,
+    registrationFee: fee.amount,
+    registrationLabel: fee.label,
+    paymentStatus: declared ? 'declared' : 'unpaid',
+    paymentMethod: declared ? application.paymentMethod : null,
+    paymentReference: declared ? application.paymentReference : null
+  };
+}
+
+async function findApplicationForParent(applicationId, email) {
+  const [applications] = await pool.execute(
+    `SELECT ${applicationColumns}
+     FROM applications
+     WHERE id = ? AND LOWER(email) = LOWER(?)`,
+    [applicationId, email]
+  );
+  return applications[0] || null;
 }
 
 function requireApplicationOrigin(req, res, next) {
