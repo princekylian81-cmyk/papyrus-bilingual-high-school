@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secrétariat Papyrus | Admissions</title>
+    <meta name="description" content="Espace sécurisé du secrétariat Papyrus pour le suivi des candidatures." />
+    <link rel="icon" type="image/png" href="/papyrus-logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/app/styles.css" />
+  </head>
+  <body class="secretary-body">
+    <header class="secretary-header">
+      <a class="header-brand" href="/" aria-label="Retour au site Papyrus">
+        <img class="brand-logo" src="/papyrus-logo.png" alt="Logo Papyrus" />
+        <span class="brand-copy">
+          <small>Bilingual High School</small>
+          <strong>PAPYRUS</strong>
+        </span>
+      </a>
+
+      <div class="header-center">
+        <span class="header-kicker">Espace du secrétariat</span>
+        <h1>Admissions</h1>
+      </div>
+
+      <form id="token-form" class="header-actions">
+        <label class="token-box" for="admin-token">
+          <span>Accès sécurisé</span>
+          <input id="admin-token" type="password" autocomplete="current-password" placeholder="Jeton administrateur" />
+        </label>
+        <button id="save-token" class="btn primary" type="submit">Connexion</button>
+      </form>
+    </header>
+
+    <main class="secretary-layout">
+      <section class="welcome-row">
+        <div class="welcome-copy">
+          <p class="eyebrow">Année scolaire 2026–2027</p>
+          <h2>Chaque avenir <em>commence ici.</em></h2>
+          <p>Examinez les dossiers, consultez les pièces et accompagnez chaque famille vers la prochaine étape.</p>
+        </div>
+        <div class="live-status"><span class="live-dot"></span><span>Synchronisation en direct</span><small>toutes les 5 secondes</small></div>
+      </section>
+
+      <section class="stats-grid" aria-label="Résumé des candidatures">
+        <article class="stat-card stat-total">
+          <span class="stat-label">Total des dossiers</span>
+          <strong id="count-total">0</strong>
+          <span class="stat-foot">Papyrus · Admissions</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label"><i class="stat-dot pending-dot"></i>Nouvelles</span>
+          <strong id="count-pending">0</strong>
+          <span class="stat-foot">À examiner</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label"><i class="stat-dot review-dot"></i>En examen</span>
+          <strong id="count-review">0</strong>
+          <span class="stat-foot">En cours d’étude</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label"><i class="stat-dot accepted-dot"></i>Validées</span>
+          <strong id="count-accepted">0</strong>
+          <span class="stat-foot">Prêtes pour la suite</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label"><i class="stat-dot rejected-dot"></i>Refusées</span>
+          <strong id="count-rejected">0</strong>
+          <span class="stat-foot">Décision rendue</span>
+        </article>
+      </section>
+
+      <section class="board-panel">
+        <div class="board-toolbar">
+          <div>
+            <p class="eyebrow">Votre espace de travail</p>
+            <h2>Dossiers de candidature</h2>
+            <p id="last-updated" class="last-updated" aria-live="polite">En attente de connexion</p>
+          </div>
+          <button id="refresh-button" class="btn refresh-button" type="button">
+            <span aria-hidden="true">↻</span> Actualiser
+          </button>
+        </div>
+
+        <div class="board-filters">
+          <div class="filter-group" role="group" aria-label="Filtrer les dossiers">
+            <button class="filter-button is-active" type="button" data-filter="all" aria-pressed="true">Tous</button>
+            <button class="filter-button" type="button" data-filter="pending" aria-pressed="false">Nouveaux</button>
+            <button class="filter-button" type="button" data-filter="under_review" aria-pressed="false">En examen</button>
+            <button class="filter-button" type="button" data-filter="accepted" aria-pressed="false">Validés</button>
+            <button class="filter-button" type="button" data-filter="rejected" aria-pressed="false">Refusés</button>
+          </div>
+        </div>
+
+        <div id="status-banner" class="status-banner" data-type="info" aria-live="polite"></div>
+        <div id="application-list" class="application-list"></div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span>© 2026 Papyrus Bilingual High School</span>
+      <span>Douala · Cameroun</span>
+    </footer>
+
+    <template id="application-card-template">
+      <article class="application-card">
+        <div class="card-topline">
+          <div>
+            <p class="application-reference"></p>
+            <h3 class="student-name"></h3>
+            <p class="created-date"></p>
+          </div>
+          <span class="status-badge"></span>
+        </div>
+
+        <div class="application-meta"></div>
+
+        <div class="document-section">
+          <div class="documents-heading">
+            <span class="documents-label">Pièces jointes</span>
+            <span class="documents-note">Documents transmis par la famille</span>
+          </div>
+          <div class="document-list"></div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn review-button" type="button" data-action="review">Mettre en examen</button>
+          <button class="btn accept-button" type="button" data-action="accept">Valider le dossier</button>
+          <button class="btn reject-button" type="button" data-action="reject">Refuser</button>
+          <a class="btn payment-link hidden" data-action="payment" href="/app/payment.html">Continuer vers le paiement <span aria-hidden="true">↗</span></a>
+        </div>
+      </article>
+    </template>
+
+    <script src="/app/app.js"></script>
+  </body>
+</html>

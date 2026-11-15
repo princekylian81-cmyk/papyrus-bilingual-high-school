@@ -4,7 +4,7 @@ Papyrus Bilingual High School website with a Node.js/Express admissions API and 
 
 ## Requirements
 
-- Node.js 20 or newer
+- Node.js 22 or newer
 - MySQL 8.0.16 or newer
 
 ## Local setup
@@ -29,11 +29,15 @@ The shared visual system uses the school's navy, institutional blue, red and lig
 
 ## Administrator API
 
+The secretary dashboard is served by the Node.js API at `/app/` (for example, `https://<api-domain>/app/`). It is not part of the GitHub Pages static site. Sign in with `ADMIN_API_TOKEN`; the dashboard checks the API every five seconds and lets staff review application details and download submitted documents. The token is kept in the current browser session only.
+
+The `admin.html` page is a public static information page; it does not display private records. Use `/app/` for the secured secretary dashboard.
+
 - `GET /api/admin/applications` — list the latest 200 applications and document metadata.
 - `GET /api/admin/applications/:applicationId/documents/:documentId` — download one private document.
 - Both endpoints require `Authorization: Bearer <ADMIN_API_TOKEN>`.
 
-The `admin.html` page is a static prototype and does not display private records. Keep the token on the server; do not put it in HTML or browser JavaScript.
+The token is never embedded in the site source; staff enter it at sign-in. Keep it private and sign out when finished.
 
 ## Configuration
 
@@ -43,5 +47,4 @@ The `admin.html` page is a static prototype and does not display private records
 - `DB_SSL=true` — verify TLS for the MySQL connection in production.
 - `ADMIN_API_TOKEN` — private bearer token, at least 32 characters.
 - `UPLOAD_DIR` — private persistent document directory (defaults outside the project root).
-- `CORS_ORIGINS` — comma-separated website origins allowed to call the API.
 - `CORS_ORIGINS` — comma-separated website origins allowed to call the API.

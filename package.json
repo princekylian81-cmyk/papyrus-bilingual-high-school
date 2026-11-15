@@ -10,7 +10,7 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "db:migrate": "node migrate.js",
-    "check": "node --check server.js && node --check db.js && node --check migrate.js && node --check script.js && node --check language.js"
+    "check": "node --check server.js && node --check db.js && node --check migrate.js && node --check script.js && node --check language.js && node --check app/app.js && node --check app/payment.js"
   },
   "dependencies": {
     "@react-three/drei": "^9.101.0",

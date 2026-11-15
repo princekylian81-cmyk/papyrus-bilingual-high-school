@@ -20,10 +20,10 @@ const allowedPages = new Set([
   'admin.html',
   'admissions.html',
   'api-config.js',
-  'api-config.js',
   'fees.html',
   'index.html',
   'language.js',
+  'papyrus-logo.png',
   'papyrus-logo.png',
   'programs.html',
   'school-life.html',
@@ -101,7 +101,7 @@ app.use((req, res, next) => {
   if (origin && (sameOrigin || allowedOrigins.has(origin))) {
     res.set('Access-Control-Allow-Origin', origin);
     res.vary('Origin');
-    res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.set('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
     res.set('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type');
   }
 
@@ -174,38 +174,82 @@ app.get('/api/admin/applications', requireAdmin, async (req, res, next) => {
       LIMIT 200
     `);
 
-    if (applications.length === 0) {
-      res.set('Cache-Control', 'no-store').json({ applications: [] });
+    const applicationsWithDocuments = await hydrateApplicationsWithDocuments(applications);
+    res.set('Cache-Control', 'no-store').json({ applications: applicationsWithDocuments });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/admin/applications/:applicationId', requireAdmin, async (req, res, next) => {
+  try {
+    const parsed = z.object({ applicationId: z.string().uuid() }).safeParse(req.params);
+    if (!parsed.success) {
+      res.status(400).json({ error: 'Invalid application reference.' });
       return;
     }
 
-    const placeholders = applications.map(() => '?').join(', ');
-    const applicationIds = applications.map((application) => application.id);
-    const [documents] = await pool.execute(`
-      SELECT id, application_id AS applicationId, document_type AS type,
-        passport_photo_number AS photoNumber, media_type AS mediaType, size_bytes AS sizeBytes
-      FROM application_documents
-      WHERE application_id IN (${placeholders})
-      ORDER BY created_at
-    `, applicationIds);
-    const documentsByApplication = new Map();
-    for (const document of documents) {
-      const current = documentsByApplication.get(document.applicationId) || [];
-      current.push({
-        id: document.id,
-        type: document.type,
-        photoNumber: document.photoNumber,
-        mediaType: document.mediaType,
-        sizeBytes: document.sizeBytes
-      });
-      documentsByApplication.set(document.applicationId, current);
+    const [applications] = await pool.execute(`
+      SELECT
+        id,
+        student_name AS studentName,
+        date_of_birth AS dateOfBirth,
+        gender,
+        guardian_name AS guardianName,
+        father_phone AS fatherPhone,
+        mother_phone AS motherPhone,
+        email,
+        desired_class AS desiredClass,
+        education_type AS educationType,
+        specialty,
+        consent_at AS consentAt,
+        status,
+        created_at AS createdAt
+      FROM applications
+      WHERE id = ?
+    `, [parsed.data.applicationId]);
+
+    if (applications.length === 0) {
+      res.status(404).json({ error: 'Application not found.' });
+      return;
+    }
+
+    const hydrated = await hydrateApplicationsWithDocuments(applications);
+    res.set('Cache-Control', 'no-store').json({ application: hydrated[0] });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.patch('/api/admin/applications/:applicationId/status', requireAdmin, async (req, res, next) => {
+  try {
+    const parsedParams = z.object({ applicationId: z.string().uuid() }).safeParse(req.params);
+    const parsedBody = z.object({
+      status: z.enum(['pending', 'under_review', 'accepted', 'rejected'])
+    }).safeParse(req.body);
+
+    if (!parsedParams.success || !parsedBody.success) {
+      res.status(400).json({ error: 'Invalid application status update.' });
+      return;
+    }
+
+    const { applicationId } = parsedParams.data;
+    const { status } = parsedBody.data;
+
+    const [result] = await pool.execute(
+      'UPDATE applications SET status = ? WHERE id = ?',
+      [status, applicationId]
+    );
+
+    if (result.affectedRows === 0) {
+      res.status(404).json({ error: 'Application not found.' });
+      return;
     }
 
     res.set('Cache-Control', 'no-store').json({
-      applications: applications.map((application) => ({
-        ...application,
-        documents: documentsByApplication.get(application.id) || []
-      }))
+      applicationId,
+      status,
+      message: 'Application status updated successfully.'
     });
   } catch (error) {
     next(error);
@@ -257,6 +301,21 @@ app.get('/api/admin/applications/:applicationId/documents/:documentId', requireA
 });
 
 app.get('/', (req, res) => res.sendFile(path.join(root, 'index.html')));
+app.get('/app', (req, res) => {
+  if (!req.path.endsWith('/')) {
+    res.redirect(302, '/app/');
+    return;
+  }
+  res.sendFile(path.join(root, 'app', 'index.html'));
+});
+app.get('/app/:file', (req, res, next) => {
+  const allowedAppFiles = new Set(['index.html', 'styles.css', 'app.js', 'payment.html', 'payment.js']);
+  if (!allowedAppFiles.has(req.params.file)) {
+    next();
+    return;
+  }
+  res.sendFile(path.join(root, 'app', req.params.file));
+});
 app.get('/assets/:asset', (req, res, next) => {
   if (!allowedAssets.has(req.params.asset)) {
     next();
@@ -409,6 +468,40 @@ async function saveApplication(req, res) {
   } finally {
     connection?.release();
   }
+}
+
+async function hydrateApplicationsWithDocuments(applications) {
+  if (applications.length === 0) {
+    return [];
+  }
+
+  const placeholders = applications.map(() => '?').join(', ');
+  const applicationIds = applications.map((application) => application.id);
+  const [documents] = await pool.execute(`
+    SELECT id, application_id AS applicationId, document_type AS type,
+      passport_photo_number AS photoNumber, media_type AS mediaType, size_bytes AS sizeBytes
+    FROM application_documents
+    WHERE application_id IN (${placeholders})
+    ORDER BY created_at
+  `, applicationIds);
+
+  const documentsByApplication = new Map();
+  for (const document of documents) {
+    const current = documentsByApplication.get(document.applicationId) || [];
+    current.push({
+      id: document.id,
+      type: document.type,
+      photoNumber: document.photoNumber,
+      mediaType: document.mediaType,
+      sizeBytes: document.sizeBytes
+    });
+    documentsByApplication.set(document.applicationId, current);
+  }
+
+  return applications.map((application) => ({
+    ...application,
+    documents: documentsByApplication.get(application.id) || []
+  }));
 }
 
 function requireApplicationOrigin(req, res, next) {

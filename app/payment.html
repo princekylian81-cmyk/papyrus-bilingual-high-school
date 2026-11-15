@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Paiement - Papyrus</title>
+    <link rel="icon" type="image/png" href="/papyrus-logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/app/styles.css" />
+  </head>
+  <body class="payment-body">
+    <main class="payment-shell">
+      <section class="payment-card">
+        <div class="payment-brand">
+          <img src="/papyrus-logo.png" alt="Logo Papyrus" />
+          <span class="brand-copy">
+            <small>Bilingual High School</small>
+            <strong>PAPYRUS</strong>
+          </span>
+        </div>
+        <div class="payment-header">
+          <p class="eyebrow">Validation</p>
+          <h1>Interface de paiement</h1>
+        </div>
+
+        <div id="payment-summary" class="payment-summary">
+          <div>
+            <span>Élève</span>
+            <strong id="summary-student">—</strong>
+          </div>
+          <div>
+            <span>Classe</span>
+            <strong id="summary-class">—</strong>
+          </div>
+          <div>
+            <span>Montant</span>
+            <strong id="summary-amount">25 000 FCFA</strong>
+          </div>
+        </div>
+
+        <div class="payment-options">
+          <label class="option-item">
+            <input type="radio" name="payment-method" value="orange-money" checked />
+            <span>Orange Money</span>
+          </label>
+          <label class="option-item">
+            <input type="radio" name="payment-method" value="mtn-momo" />
+            <span>MTN Mobile Money</span>
+          </label>
+          <label class="option-item">
+            <input type="radio" name="payment-method" value="bank-transfer" />
+            <span>Virement bancaire</span>
+          </label>
+        </div>
+
+        <label class="field-group">
+          <span>Référence du paiement</span>
+          <input id="payment-reference" type="text" value="PAPYRUS-2026-001" />
+        </label>
+
+        <div class="payment-actions">
+          <button id="confirm-payment" class="btn primary" type="button">Confirmer le paiement</button>
+          <a href="/app/" class="btn secondary">Retour au tableau</a>
+        </div>
+
+        <p id="payment-message" class="payment-message" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <script src="payment.js"></script>
+  </body>
+</html>
