@@ -850,6 +850,96 @@ input.invalid, select.invalid, textarea.invalid {
   gap: 1rem;
 }
 
+body.application-waiting-active {
+  min-height: 100vh;
+  background: #fff;
+}
+
+body.application-waiting-active > :not(#application-waiting) {
+  display: none !important;
+}
+
+.application-waiting[hidden],
+.application-waiting-spinner[hidden],
+.application-waiting-error[hidden],
+#waiting-return[hidden] {
+  display: none !important;
+}
+
+.application-waiting:not([hidden]) {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1.25rem;
+  color: var(--text);
+  background: #fff;
+}
+
+.application-waiting-content {
+  width: min(100%, 38rem);
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.application-waiting-mark {
+  width: 3.5rem;
+  height: 3.5rem;
+  display: grid;
+  place-items: center;
+  margin-bottom: 1.5rem;
+  color: var(--white);
+  background: var(--navy);
+  border-radius: 50%;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 1.6rem;
+}
+
+.application-waiting-spinner {
+  width: 1.4rem;
+  height: 1.4rem;
+  margin-bottom: 1.4rem;
+  border: 2px solid var(--gray-mid);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: application-waiting-spin 0.9s linear infinite;
+}
+
+.application-waiting-content .eyebrow {
+  margin-bottom: 0.6rem;
+}
+
+.application-waiting-content h1 {
+  margin: 0;
+  color: var(--navy);
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(1.8rem, 6vw, 2.7rem);
+  line-height: 1.15;
+}
+
+.application-waiting-content > p:not(.eyebrow) {
+  max-width: 32rem;
+  margin: 1rem 0 0;
+  color: var(--gray-strong);
+}
+
+.application-waiting-content .application-waiting-error {
+  color: var(--red);
+  font-size: 0.9rem;
+}
+
+.application-waiting-content #waiting-return {
+  margin-top: 1.5rem;
+}
+
+@keyframes application-waiting-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .application-waiting-spinner { animation-duration: 2s; }
+}
+
 .follow-options {
   display: grid;
   gap: 0.7rem;

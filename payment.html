@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Paiement - Papyrus</title>
+    <link rel="icon" type="image/png" href="app/papyrus-logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="app/styles.css" />
+    <script src="api-config.js"></script>
+  </head>
+  <body class="payment-body">
+    <main class="payment-shell">
+      <section class="payment-card">
+        <div class="payment-brand">
+          <img src="app/papyrus-logo.png" alt="Logo Papyrus" />
+          <span class="brand-copy">
+            <small>Bilingual High School</small>
+            <strong>PAPYRUS</strong>
+          </span>
+        </div>
+        <div class="payment-header">
+          <p class="eyebrow">Dossier accepté</p>
+          <h1>Paiement des frais d’inscription</h1>
+        </div>
+
+        <div id="payment-summary" class="payment-summary">
+          <div>
+            <span>Élève</span>
+            <strong id="summary-student">—</strong>
+          </div>
+          <div>
+            <span>Classe</span>
+            <strong id="summary-class">—</strong>
+          </div>
+          <div>
+            <span>Montant</span>
+            <strong id="summary-amount">—</strong>
+          </div>
+        </div>
+
+        <div class="payment-options">
+          <label class="option-item">
+            <input type="radio" name="payment-method" value="orange-money" checked />
+            <span>Orange Money</span>
+          </label>
+          <label class="option-item">
+            <input type="radio" name="payment-method" value="mtn-momo" />
+            <span>MTN Mobile Money</span>
+          </label>
+          <label class="option-item">
+            <input type="radio" name="payment-method" value="bank-transfer" />
+            <span>Virement bancaire</span>
+          </label>
+        </div>
+
+        <label class="field-group">
+          <span>Référence du paiement</span>
+          <input id="payment-reference" type="text" maxlength="80" placeholder="Référence reçue après votre paiement" required />
+        </label>
+
+        <p class="payment-note">Effectuez le paiement auprès de l’établissement avec le moyen choisi, puis saisissez la référence reçue. Cette page transmet la référence au secrétariat; elle ne débite pas votre compte.</p>
+
+        <div class="payment-actions">
+          <button id="confirm-payment" class="btn primary" type="button">Confirmer le paiement</button>
+          <a href="suivi.html" class="btn secondary">Retour au suivi</a>
+        </div>
+
+        <p id="payment-message" class="payment-message" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <script src="app/payment.js"></script>
+  </body>
+</html>

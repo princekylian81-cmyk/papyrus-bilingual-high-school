@@ -25,6 +25,7 @@ const allowedPages = new Set([
   'index.html',
   'language.js',
   'papyrus-logo.png',
+  'payment.html',
   'papyrus-logo.png',
   'programs.html',
   'school-life.html',

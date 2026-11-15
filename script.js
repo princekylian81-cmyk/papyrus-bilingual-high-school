@@ -517,14 +517,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }));
           } catch (error) {
             console.warn('Could not save the parent follow-up session.', error);
+            message.className = 'form-message success';
+            message.replaceChildren(document.createTextNode(`${translate('Application received securely. Your reference is')} ${reference}. `));
+            const followLink = document.createElement('a');
+            followLink.href = `suivi.html?reference=${encodeURIComponent(reference)}`;
+            followLink.textContent = translate('Follow this application');
+            message.append(followLink);
+            form.reset();
+            return;
           }
-          message.className = 'form-message success';
-          message.replaceChildren(document.createTextNode(`${translate('Application received securely. Your reference is')} ${reference}. `));
-          const followLink = document.createElement('a');
-          followLink.href = `suivi.html?reference=${encodeURIComponent(reference)}`;
-          followLink.textContent = translate('Follow this application');
-          message.append(followLink);
-          form.reset();
+          window.location.assign(`suivi.html?reference=${encodeURIComponent(reference)}&submitted=1`);
         })
         .catch((error) => {
           message.className = 'form-message error';

@@ -29,8 +29,9 @@ jobs:
           enablement: true
       - name: Prepare static site
         run: |
-          mkdir -p _site/assets
-          cp about.html admin.html admissions.html fees.html index.html programs.html school-life.html specialties.html suivi.html api-config.js language.js script.js suivi.js styles.css papyrus-logo.png robots.txt sitemap.xml _site/
+          mkdir -p _site/assets _site/app
+          cp about.html admin.html admissions.html fees.html index.html payment.html programs.html school-life.html specialties.html suivi.html api-config.js language.js script.js suivi.js styles.css papyrus-logo.png robots.txt sitemap.xml _site/
+          cp app/payment.js app/styles.css app/papyrus-logo.png _site/app/
           cp -R assets/. _site/assets/
       - name: Upload site
         uses: actions/upload-pages-artifact@v3

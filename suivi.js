@@ -4,12 +4,18 @@ const referenceInput = document.getElementById('reference');
 const emailInput = document.getElementById('parent-email');
 const followMessage = document.getElementById('follow-message');
 const followPanel = document.getElementById('follow-panel');
+const waitingScreen = document.getElementById('application-waiting');
+const waitingTitle = document.getElementById('waiting-title');
+const waitingDescription = document.getElementById('waiting-description');
+const waitingError = document.getElementById('waiting-error');
+const waitingReturn = document.getElementById('waiting-return');
 const storageKey = 'papyrus-parent-follow';
-const pollInterval = 5000;
+const pollInterval = 20_000;
 
 let currentLookup = null;
 let lastSignature = '';
 let pollTimer;
+let waitingMode = false;
 
 function translate(value) {
   return window.papyrusTranslate?.(value) || value;
@@ -53,6 +59,15 @@ function setMessage(text, type) {
   followMessage.textContent = text;
 }
 
+function setWaitingStatus(title, description, { complete = false, allowReturn = false } = {}) {
+  waitingTitle.textContent = translate(title);
+  waitingDescription.textContent = translate(description);
+  waitingReturn.textContent = translate('Return to admissions');
+  waitingError.hidden = true;
+  waitingReturn.hidden = !allowReturn;
+  waitingScreen.querySelector('.application-waiting-spinner').hidden = complete;
+}
+
 function statusTitle(status) {
   return {
     pending: 'Waiting for the secretary',
@@ -83,6 +98,37 @@ function renderApplication(application) {
   const signature = JSON.stringify(application);
   if (signature === lastSignature) return;
   lastSignature = signature;
+
+  if (waitingMode) {
+    if (application.status === 'accepted' && application.paymentStatus !== 'declared') {
+      window.clearInterval(pollTimer);
+      window.location.replace(`payment.html?reference=${encodeURIComponent(application.reference)}`);
+      return;
+    }
+
+    if (application.status === 'rejected') {
+      setWaitingStatus(
+        'Application not accepted',
+        application.decisionNote || 'The administration has completed its review of your application.',
+        { complete: true, allowReturn: true }
+      );
+      window.clearInterval(pollTimer);
+      return;
+    }
+
+    if (application.status === 'accepted') {
+      setWaitingStatus(
+        'Payment reference received',
+        'The administration has received your payment reference.',
+        { complete: true, allowReturn: true }
+      );
+      window.clearInterval(pollTimer);
+      return;
+    }
+
+    setWaitingStatus(statusTitle(application.status), statusText(application.status));
+    return;
+  }
 
   followPanel.replaceChildren();
   const heading = document.createElement('h3');
@@ -210,8 +256,14 @@ async function loadApplication({ quiet = false } = {}) {
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(payload.error || 'No application matches this reference and email address.');
     if (!quiet) followMessage.className = 'form-message';
+    if (waitingMode) waitingError.hidden = true;
     renderApplication(payload.application);
   } catch (error) {
+    if (waitingMode) {
+      waitingError.textContent = translate(error.message || 'The application status could not be checked. Retrying automatically.');
+      waitingError.hidden = false;
+      return;
+    }
     followPanel.replaceChildren();
     lastSignature = '';
     setMessage(translate(error.message), 'error');
@@ -249,12 +301,22 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   const requestedReference = new URLSearchParams(window.location.search).get('reference') || '';
+  const submittedFromApplication = new URLSearchParams(window.location.search).get('submitted') === '1';
   const storedLookup = readStoredLookup();
   if (requestedReference) referenceInput.value = requestedReference;
   if (storedLookup && (!requestedReference || storedLookup.reference === requestedReference)) {
     referenceInput.value = storedLookup.reference;
     emailInput.value = storedLookup.email;
     currentLookup = storedLookup;
+    if (submittedFromApplication) {
+      waitingMode = true;
+      waitingScreen.hidden = false;
+      document.body.classList.add('application-waiting-active');
+      setWaitingStatus(
+        'Awaiting administration review',
+        'Your application has been received. The page will continue to payment automatically if it is approved.'
+      );
+    }
     loadApplication();
     startPolling();
   }

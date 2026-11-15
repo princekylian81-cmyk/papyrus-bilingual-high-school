@@ -12,6 +12,17 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <main id="application-waiting" class="application-waiting" hidden aria-live="polite">
+      <div class="application-waiting-content">
+        <span class="application-waiting-mark" aria-hidden="true">P</span>
+        <span class="application-waiting-spinner" aria-hidden="true"></span>
+        <p class="eyebrow">Admissions</p>
+        <h1 id="waiting-title"></h1>
+        <p id="waiting-description"></p>
+        <p id="waiting-error" class="application-waiting-error" hidden></p>
+        <a id="waiting-return" class="btn primary" href="admissions.html" hidden>Return to admissions</a>
+      </div>
+    </main>
     <div id="loader"><div class="loader-inner"><div class="loader-ring"></div><div class="loader-text">Papyrus</div></div></div>
 
     <header class="site-header">
@@ -67,7 +78,7 @@
               <h3>What happens next</h3>
               <p>The secretary compares the file with the school requirements.</p>
               <p>If the file is refused, the reason appears here.</p>
-              <p>If the file is accepted, the registration payment opens on this page.</p>
+              <p>If the file is accepted after submission, the payment page opens automatically.</p>
             </div>
           </div>
 
@@ -88,7 +99,7 @@
                 <button type="submit" class="btn primary">Check status</button>
               </div>
               <div id="follow-message" class="form-message" role="status" aria-live="polite"></div>
-              <p class="form-help">The page checks the secretary’s decision every five seconds.</p>
+              <p class="form-help">The page checks the secretary’s decision every twenty seconds.</p>
             </form>
             <div id="follow-panel" class="follow-panel" style="margin-top: 1.5rem;"></div>
           </div>
