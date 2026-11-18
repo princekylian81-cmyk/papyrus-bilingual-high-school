@@ -232,6 +232,8 @@ const frenchTranslations = {
   'Home / Specialties': 'Accueil / Spécialités',
   'Commercial & Industrial': 'Commercial et industriel',
   'Specialty pathways': 'Filières de spécialisation',
+  'Explore by pathway': 'Explorer par filière',
+  'Filter specialties by pathway': 'Filtrer les spécialités par filière',
   'Programs designed to match learners’ interests and local professional demand.': 'Des formations adaptées aux intérêts des élèves et aux besoins professionnels locaux.',
   'All': 'Toutes',
   'Commercial': 'Commercial',

@@ -356,7 +356,11 @@ document.addEventListener('DOMContentLoaded', () => {
   filterPills.forEach((pill) => {
     pill.addEventListener('click', () => {
       const filter = pill.dataset.filter;
-      filterPills.forEach((item) => item.classList.toggle('active', item === pill));
+      filterPills.forEach((item) => {
+        const isActive = item === pill;
+        item.classList.toggle('active', isActive);
+        item.setAttribute('aria-pressed', String(isActive));
+      });
       specialtyCards.forEach((card) => {
         const matches = filter === 'all' || card.dataset.category === filter;
         card.style.display = matches ? '' : 'none';

@@ -58,17 +58,20 @@
         </div>
       </section>
 
-      <section class="section">
-        <div class="container reveal">
-          <div class="section-header">
+      <section class="section specialty-section">
+        <div class="container specialty-content">
+          <div class="section-header specialty-section-heading">
             <span class="eyebrow">Specialty pathways</span>
             <h2>Programs designed to match learners’ interests and local professional demand.</h2>
           </div>
 
-          <div class="filter-bar">
-            <button class="filter-pill active" type="button" data-filter="all">All</button>
-            <button class="filter-pill" type="button" data-filter="commercial">Commercial</button>
-            <button class="filter-pill" type="button" data-filter="industrial">Industrial</button>
+          <div class="specialty-toolbar">
+            <span class="specialty-toolbar-label">Explore by pathway</span>
+            <div class="filter-bar" role="group" aria-label="Filter specialties by pathway">
+              <button class="filter-pill active" type="button" data-filter="all" aria-pressed="true">All</button>
+              <button class="filter-pill" type="button" data-filter="commercial" aria-pressed="false">Commercial</button>
+              <button class="filter-pill" type="button" data-filter="industrial" aria-pressed="false">Industrial</button>
+            </div>
           </div>
 
           <div class="specialty-grid">
