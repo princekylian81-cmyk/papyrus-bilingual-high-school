@@ -19,6 +19,7 @@ const allowedPages = new Set([
   'about.html',
   'admin.html',
   'admissions.html',
+  'class-equivalents.js',
   'suivi.html',
   'api-config.js',
   'fees.html',
@@ -634,7 +635,9 @@ function buildRequirements(application, documents) {
     { id: 'specialty', label: 'Spécialité conforme à la filière', met: specialtyMet, blocking: true },
     {
       id: 'pathway',
-      label: examClass ? 'Admission sur concours (6e et Form I)' : 'Étude de dossier à partir de Form II',
+      label: examClass
+        ? 'Admission sur concours (6e · Sixième et Form I · Sixième)'
+        : 'Étude de dossier à partir de Form II · Cinquième',
       met: true,
       blocking: false
     }

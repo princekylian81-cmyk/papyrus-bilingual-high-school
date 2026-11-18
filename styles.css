@@ -35,7 +35,7 @@ html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  font-family: "Manrope", sans-serif;
+  font-family: "DM Sans", sans-serif;
   background: var(--gray-light);
   color: var(--text);
   line-height: 1.6;
@@ -82,7 +82,7 @@ h1, h2, h3, h4 {
   margin: 0 0 1rem;
   color: var(--navy);
   line-height: 1.08;
-  font-family: "Cormorant Garamond", serif;
+  font-family: "Playfair Display", Georgia, serif;
   letter-spacing: -0.03em;
 }
 
@@ -409,7 +409,7 @@ p { margin: 0 0 1rem; color: rgba(32, 40, 58, 0.82); }
 }
 
 .stat-card .digit {
-  font-family: "Cormorant Garamond", serif;
+  font-family: "Playfair Display", Georgia, serif;
   font-size: clamp(2.1rem, 3vw, 3.1rem);
   color: var(--navy);
   margin-bottom: 0.4rem;
@@ -3186,6 +3186,36 @@ tbody tr:hover { background: rgba(101,181,255,0.08); }
   .form-wrap { padding: 1.1rem; }
 }
 
+@media (max-width: 780px) {
+  .site-header .nav-actions > .btn {
+    display: inline-flex;
+    min-height: 42px;
+    padding: 0 0.7rem;
+    font-size: 0.6rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .brand-copy small { display: none; }
+  .site-header .nav-actions { gap: 0.35rem; }
+  .site-header .nav-actions > .btn {
+    padding: 0 0.55rem;
+    font-size: 0.55rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .site-header .motion-toggle,
+  .site-header .language-toggle { display: none; }
+}
+
+.class-equivalent {
+  color: var(--blue);
+  font-size: 0.88em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 @view-transition {
   navigation: auto;
 }
@@ -3231,4 +3261,17 @@ tbody tr:hover { background: rgba(101,181,255,0.08); }
     clip-path: none !important;
     transform: none !important;
   }
+}
+
+.page-hero {
+  background-image:
+    linear-gradient(90deg, rgba(9, 28, 52, 0.97) 0%, rgba(9, 28, 52, 0.9) 46%, rgba(9, 28, 52, 0.56) 100%),
+    url("assets/students-campus.jpg");
+  background-position: center, 55% 42%;
+  background-size: cover;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 4px;
 }

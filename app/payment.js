@@ -70,7 +70,7 @@ async function loadApplication() {
 
     currentApplication = payload.application;
     summaryStudent.textContent = currentApplication.studentName || '—';
-    summaryClass.textContent = currentApplication.desiredClass || '—';
+    summaryClass.textContent = window.formatPapyrusClass(currentApplication.desiredClass);
     summaryAmount.textContent = `${formatFee(currentApplication.registrationFee)} · ${currentApplication.registrationLabel || 'Inscription'}`;
 
     if (currentApplication.status !== 'accepted') {

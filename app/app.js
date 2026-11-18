@@ -183,7 +183,7 @@ function renderApplications() {
     const details = fragment.querySelector('.application-meta');
     appendDetail(details, 'Date de naissance', formatDateOnly(application.dateOfBirth));
     appendDetail(details, 'Genre', application.gender === 'Female' ? 'Féminin' : application.gender === 'Male' ? 'Masculin' : '—');
-    appendDetail(details, 'Classe demandée', application.desiredClass);
+    appendDetail(details, 'Classe demandée', window.formatPapyrusClass(application.desiredClass));
     appendDetail(details, 'Parcours', application.educationType);
     appendDetail(details, 'Spécialité', application.specialty);
     appendDetail(details, 'Parent / responsable', application.guardianName);

@@ -137,7 +137,7 @@ function renderApplication(application) {
   summary.textContent = translate(statusText(application.status));
   followPanel.append(heading, summary);
   appendFact(followPanel, 'Student', application.studentName);
-  appendFact(followPanel, 'Desired Class', application.desiredClass);
+  appendFact(followPanel, 'Desired Class', window.formatPapyrusClass(application.desiredClass));
   appendFact(followPanel, 'Pathway', application.educationType);
   if (application.specialty) appendFact(followPanel, 'Specialty', application.specialty);
   appendFact(followPanel, 'Amount due now', `${formatFee(application.registrationFee)} · ${translate(application.registrationLabel || 'Registration')}`);
